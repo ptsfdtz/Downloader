@@ -30,7 +30,7 @@ async function fetchData(videoId) {
 
         const seasonData = await getData(apiUrl, token);
         const urls = seasonData.episodes.map(episode => episode.url);
-        const encodedUrls = await Promise.all(urls.map(encodeUrlPartially));
+        const encodedUrls = urls.map(encodeUrlPartially);
 
         fs.writeFileSync('urls.txt', encodedUrls.join('\n'), 'utf8');
     } catch (error) {
