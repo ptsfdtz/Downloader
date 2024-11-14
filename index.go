@@ -53,32 +53,28 @@ func fetchAndDownloadFiles(videoId string) {
 	var config Config
 	json.Unmarshal(configFile, &config)
 
-	// Fetch video data
 	url := fmt.Sprintf("https://online.njtech.edu.cn/api/v2/videos/%s?id=%s", videoId, videoId)
 	videoDataJson := getData(url, config.OnlineToken)
 	var videoData VideoData
 	json.Unmarshal(videoDataJson, &videoData)
 
-	// Fetch season data
 	seasonId := videoData.Seasons[0].ID
 	apiUrl := fmt.Sprintf("https://online.njtech.edu.cn/api/v2/video_seasons/%s?order=asc&orderBy=index", seasonId)
 	seasonDataJson := getData(apiUrl, config.OnlineToken)
 	var seasonData SeasonData
 	json.Unmarshal(seasonDataJson, &seasonData)
 
-	// Create media folder if it doesn’t exist
-	os.MkdirAll("media", os.ModePerm)
+	dirPath := filepath.Join("media", videoId)
+	os.MkdirAll(dirPath, os.ModePerm)
 
 	for _, episode := range seasonData.Episodes {
 		url := encodeUrlPartially(episode.URL)
 		fmt.Printf("正在下载: %s\n", url)
 
-		// Extract the file name from the URL
 		fileName := filepath.Base(url)
 		fileName = strings.ReplaceAll(fileName, "%20", " ")
+		filePath := filepath.Join(dirPath, fileName)
 
-		// Download file to media/{name}
-		filePath := filepath.Join("media", fileName)
 		out, _ := os.Create(filePath)
 		defer out.Close()
 		resp, _ := http.Get(url)
